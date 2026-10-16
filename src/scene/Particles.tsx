@@ -54,9 +54,12 @@ export function Particles() {
     pool.length = 0
   }, [])
 
+  const drawn = useRef(-1)
   useFrame((_, dt) => {
     const m = mesh.current
     if (!m) return
+    // Nothing alive and nothing left on screen: skip the per-instance work and the GPU upload.
+    if (pool.length === 0 && drawn.current === 0) return
     for (let i = pool.length - 1; i >= 0; i--) {
       const p = pool[i]
       p.life += dt
@@ -70,20 +73,19 @@ export function Particles() {
       p.z += p.vz * dt
       p.vx *= 0.98
     }
-    for (let i = 0; i < MAX; i++) {
+    // Only live particles are drawn: `count` limits the draw to the first pool.length instances.
+    for (let i = 0; i < pool.length; i++) {
       const p = pool[i]
-      if (!p) {
-        dummy.scale.setScalar(0)
-      } else {
-        const k = 1 - p.life / p.max
-        dummy.position.set(p.x, p.y, p.z)
-        dummy.rotation.set(p.life * p.spin, p.life * p.spin * 0.7, 0)
-        dummy.scale.set(p.size * (0.4 + k), p.size * (0.4 + k) * 0.6, p.size * 0.3)
-        m.setColorAt(i, p.color)
-      }
+      const k = 1 - p.life / p.max
+      dummy.position.set(p.x, p.y, p.z)
+      dummy.rotation.set(p.life * p.spin, p.life * p.spin * 0.7, 0)
+      dummy.scale.set(p.size * (0.4 + k), p.size * (0.4 + k) * 0.6, p.size * 0.3)
       dummy.updateMatrix()
       m.setMatrixAt(i, dummy.matrix)
+      m.setColorAt(i, p.color)
     }
+    m.count = pool.length
+    drawn.current = pool.length
     m.instanceMatrix.needsUpdate = true
     if (m.instanceColor) m.instanceColor.needsUpdate = true
   })

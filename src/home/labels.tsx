@@ -1,5 +1,6 @@
 import { useFrame, useThree } from '@react-three/fiber'
-import { Vector3 } from 'three'
+import { Matrix4, Vector3 } from 'three'
+import { useRef } from 'react'
 import { DECOR, UPGRADE_IDS, upgradePrice, type DecorId, type UpgradeId } from '../game/profile'
 import { useGame } from '../game/store'
 import { UpgradeIcon } from '../ui/art'
@@ -23,11 +24,22 @@ function anchor(key: string, pos: [number, number, number]) {
 }
 
 const tmp = new Vector3()
+const lastView = new Matrix4()
+const view = new Matrix4()
 
-/** Lives inside the canvas: projects every anchor to the screen. */
+/** Lives inside the canvas: projects every anchor to the screen, only when the view changed. */
 export function LabelProjector() {
   const { camera, size } = useThree()
+  const lastSize = useRef('')
   useFrame(() => {
+    const sizeKey = `${size.width}x${size.height}`
+    view.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse)
+    const moved = !lastView.equals(view) || sizeKey !== lastSize.current
+    // New labels (a decoration was bought) still need placing even when the camera is still.
+    const pending = [...anchors.values()].some((a) => a.el && !a.el.style.transform)
+    if (!moved && !pending) return
+    lastView.copy(view)
+    lastSize.current = sizeKey
     for (const a of anchors.values()) {
       if (!a.el) continue
       tmp.copy(a.pos).project(camera)

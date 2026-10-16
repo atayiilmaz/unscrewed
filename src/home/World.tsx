@@ -1,6 +1,7 @@
 import { RoundedBox } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
 import { useMemo, useRef } from 'react'
+import { StaticMerge } from '../scene/StaticMerge'
 import { ExtrudeGeometry, Shape, type Group } from 'three'
 
 /** The neighbourhood around the workshop: grass, street, traffic, trees and houses. */
@@ -9,11 +10,6 @@ const GRASS = '#86c76a'
 const ROAD_Z = 10.5
 
 function Tree({ x, z, s = 1, hue = 0 }: { x: number; z: number; s?: number; hue?: number }) {
-  const ref = useRef<Group>(null)
-  const phase = x * 0.37 + z * 0.71
-  useFrame(({ clock }) => {
-    if (ref.current) ref.current.rotation.z = Math.sin(clock.elapsedTime * 0.8 + phase) * 0.025
-  })
   const leaf = ['#4fae4f', '#3f9a48', '#5cbf55'][hue % 3]
   return (
     <group position={[x, 0, z]} scale={s}>
@@ -21,7 +17,7 @@ function Tree({ x, z, s = 1, hue = 0 }: { x: number; z: number; s?: number; hue?
         <cylinderGeometry args={[0.14, 0.2, 1.2, 8]} />
         <meshStandardMaterial color="#8a5a3a" />
       </mesh>
-      <group ref={ref} position={[0, 1.1, 0]}>
+      <group position={[0, 1.1, 0]}>
         <mesh position={[0, 0.8, 0]} castShadow>
           <coneGeometry args={[1.0, 1.8, 8]} />
           <meshStandardMaterial color={leaf} flatShading />
@@ -151,14 +147,18 @@ function Car({ lane, speed, offset, color }: { lane: number; speed: number; offs
     ref.current.position.set(x, 0, ROAD_Z + lane)
   })
   return (
-    <group ref={ref} rotation-y={dir > 0 ? 0 : Math.PI}>
-      <RoundedBox args={[2.2, 0.7, 1.25]} radius={0.25} position={[0, 0.6, 0]} castShadow>
+    <group ref={ref} rotation-y={dir > 0 ? 0 : Math.PI} userData={{ noMerge: true }}>
+      <mesh rotation-x={-Math.PI / 2} position={[0, 0.02, 0]} scale={[1.5, 0.85, 1]}>
+        <circleGeometry args={[0.9, 20]} />
+        <meshBasicMaterial color="#000" transparent opacity={0.22} depthWrite={false} />
+      </mesh>
+      <RoundedBox smoothness={2} bevelSegments={2} args={[2.2, 0.7, 1.25]} radius={0.25} position={[0, 0.6, 0]}>
         <meshStandardMaterial color={color} roughness={0.3} />
       </RoundedBox>
-      <RoundedBox args={[1.25, 0.55, 1.15]} radius={0.18} position={[-0.15, 1.12, 0]} castShadow>
+      <RoundedBox smoothness={2} bevelSegments={2} args={[1.25, 0.55, 1.15]} radius={0.18} position={[-0.15, 1.12, 0]}>
         <meshStandardMaterial color="#2a3b66" roughness={0.1} metalness={0.3} />
       </RoundedBox>
-      <RoundedBox args={[1.35, 0.14, 1.22]} radius={0.06} position={[-0.15, 1.42, 0]}>
+      <RoundedBox smoothness={2} bevelSegments={2} args={[1.35, 0.14, 1.22]} radius={0.06} position={[-0.15, 1.42, 0]}>
         <meshStandardMaterial color="#f3e2bf" roughness={0.5} />
       </RoundedBox>
       {[-0.7, 0.7].map((wx) =>
@@ -191,7 +191,7 @@ function Car({ lane, speed, offset, color }: { lane: number; speed: number; offs
 
 export function World() {
   return (
-    <group>
+    <StaticMerge>
       {/* Grass with a soft checker so the ground does not look flat */}
       <mesh rotation-x={-Math.PI / 2} position={[0, -0.02, 0]} receiveShadow>
         <planeGeometry args={[90, 90]} />
@@ -272,6 +272,6 @@ export function World() {
       ).map(([x, z], i) => (
         <Bush key={i} x={x} z={z} />
       ))}
-    </group>
+    </StaticMerge>
   )
 }

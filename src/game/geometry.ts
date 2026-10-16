@@ -37,8 +37,23 @@ function plateSamples(def: PlateDef) {
   return pts
 }
 
+const atRest = (d: PlateDef, p: PlatePose) => p.x === d.x && p.y === d.y && p.angle === d.angle
+/** Most plates never move, so overlaps between plates at rest are computed once per pair. */
+const restOverlap = new WeakMap<PlateDef, WeakMap<PlateDef, boolean>>()
+
 /** Do two plates share any area at their poses? (A sliver along the edge does not count.) */
 export function platesOverlap(a: PlateDef, poseA: PlatePose, b: PlateDef, poseB: PlatePose): boolean {
+  if (atRest(a, poseA) && atRest(b, poseB)) {
+    let row = restOverlap.get(a)
+    if (!row) restOverlap.set(a, (row = new WeakMap()))
+    let hit = row.get(b)
+    if (hit === undefined) row.set(b, (hit = overlapAt(a, poseA, b, poseB)))
+    return hit
+  }
+  return overlapAt(a, poseA, b, poseB)
+}
+
+function overlapAt(a: PlateDef, poseA: PlatePose, b: PlateDef, poseB: PlatePose): boolean {
   const reach = Math.hypot(a.w, a.h) / 2 + Math.hypot(b.w, b.h) / 2
   if (Math.hypot(poseA.x - poseB.x, poseA.y - poseB.y) > reach) return false
   const c = Math.cos(poseA.angle)

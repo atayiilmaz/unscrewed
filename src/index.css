@@ -151,8 +151,7 @@ button {
   gap: 4px;
   padding: 5px 12px 5px 8px;
   border-radius: 99px;
-  background: rgb(255 255 255 / 0.12);
-  backdrop-filter: blur(4px);
+  background: rgb(30 40 80 / 0.88);
   font-size: 13px;
   font-weight: 700;
 }
@@ -450,8 +449,7 @@ button:disabled {
   gap: 6px;
   padding: 4px 10px 4px 4px;
   border-radius: 99px;
-  background: rgb(20 28 60 / 0.82);
-  backdrop-filter: blur(6px);
+  background: rgb(20 28 60 / 0.92);
 }
 
 .avatar {
@@ -520,8 +518,7 @@ button:disabled {
 }
 
 .home-top .coins {
-  background: rgb(20 28 60 / 0.82);
-  backdrop-filter: blur(6px);
+  background: rgb(20 28 60 / 0.92);
 }
 
 .round-btn {
@@ -531,8 +528,7 @@ button:disabled {
   border-radius: 50%;
   display: grid;
   place-items: center;
-  background: rgb(20 28 60 / 0.82);
-  backdrop-filter: blur(6px);
+  background: rgb(20 28 60 / 0.92);
   font-weight: 800;
   box-shadow: 0 3px 0 rgb(0 0 0 / 0.3);
 }
@@ -552,7 +548,7 @@ button:disabled {
   transform: translateX(-50%);
   padding: 6px 14px;
   border-radius: 99px;
-  background: rgb(20 28 60 / 0.82);
+  background: rgb(20 28 60 / 0.92);
   font-size: 14px;
   font-weight: 700;
   white-space: nowrap;
@@ -571,8 +567,7 @@ button:disabled {
   gap: 4px;
   padding: 6px;
   border-radius: 24px;
-  background: rgb(20 28 60 / 0.9);
-  backdrop-filter: blur(8px);
+  background: rgb(20 28 60 / 0.96);
   box-shadow: 0 6px 0 rgb(0 0 0 / 0.25);
   z-index: 5;
 }
@@ -605,7 +600,7 @@ button:disabled {
   border-radius: 50%;
   background: #ff4f5e;
   box-shadow: 0 0 0 2px #141c3c;
-  animation: pulse 1.4s infinite;
+  animation: dotPulse 1.4s ease-in-out infinite;
 }
 
 .play-orb {
@@ -1561,4 +1556,24 @@ button:disabled {
   font-weight: 800;
   color: rgb(255 255 255 / 0.85);
   text-shadow: 0 2px 0 rgb(0 0 0 / 0.4);
+}
+
+@keyframes dotPulse {
+  50% {
+    transform: scale(1.25);
+    opacity: 0.75;
+  }
+}
+
+.fps {
+  position: fixed;
+  left: 50%;
+  top: calc(max(6px, env(safe-area-inset-top)) + 54px);
+  transform: translateX(-50%);
+  z-index: 200;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: rgb(0 0 0 / 0.75);
+  font: 700 12px ui-monospace, monospace;
+  pointer-events: none;
 }

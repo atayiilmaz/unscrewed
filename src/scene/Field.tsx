@@ -1,7 +1,7 @@
 import { RoundedBox } from '@react-three/drei'
 import { useFrame, useThree } from '@react-three/fiber'
-import { useEffect, useMemo, useRef } from 'react'
-import { Vector3, type Group, type PerspectiveCamera } from 'three'
+import { useEffect, useLayoutEffect, useMemo, useRef } from 'react'
+import { Matrix4, Vector3, type Group, type InstancedMesh, type PerspectiveCamera } from 'three'
 import { BOX_LEAVE_MS, useGame } from '../game/store'
 import type { BoxState } from '../game/types'
 import { boxAnchors, COLORS, LAYOUT, traySlotPos } from './layout'
@@ -32,39 +32,55 @@ export function Backdrop() {
   )
 }
 
+function Holes({ points }: { points: Array<[number, number]> }) {
+  const hole = useRef<InstancedMesh>(null)
+  const rim = useRef<InstancedMesh>(null)
+  useLayoutEffect(() => {
+    const m = new Matrix4()
+    points.forEach(([x, y], i) => {
+      m.makeTranslation(x, y, 0.015)
+      hole.current?.setMatrixAt(i, m)
+      m.makeTranslation(x, y, 0.017)
+      rim.current?.setMatrixAt(i, m)
+    })
+    if (hole.current) hole.current.instanceMatrix.needsUpdate = true
+    if (rim.current) rim.current.instanceMatrix.needsUpdate = true
+  }, [points])
+  return (
+    <>
+      <instancedMesh ref={hole} args={[undefined, undefined, points.length]}>
+        <circleGeometry args={[0.2, 16]} />
+        <meshStandardMaterial color="#3b2412" roughness={1} />
+      </instancedMesh>
+      <instancedMesh ref={rim} args={[undefined, undefined, points.length]}>
+        <ringGeometry args={[0.2, 0.26, 16]} />
+        <meshStandardMaterial color="#8f5f33" roughness={1} />
+      </instancedMesh>
+    </>
+  )
+}
+
 export function Board() {
   const { w, h } = LAYOUT.board
   const level = useGame((s) => s.game.level)
   const wood = useMemo(() => woodTexture(1, 1.1), [])
   return (
     <group>
-      <RoundedBox args={[w, h, 0.5]} radius={0.22} position={[0, 0, -0.3]} castShadow receiveShadow>
+      <RoundedBox smoothness={2} bevelSegments={2} args={[w, h, 0.5]} radius={0.22} position={[0, 0, -0.3]} castShadow receiveShadow>
         <meshStandardMaterial color="#a8703f" roughness={0.8} />
       </RoundedBox>
       <mesh position={[0, 0, -0.04]} receiveShadow>
         <boxGeometry args={[w - 0.4, h - 0.4, 0.1]} />
         <meshStandardMaterial map={wood} roughness={0.7} />
       </mesh>
-      {/* Threaded holes stay behind once a screw is out. */}
-      {level.plates.flatMap((p) =>
-        p.screws.map((s) => (
-          <group key={s.id} position={[s.x, s.y, 0.015]}>
-            <mesh>
-              <circleGeometry args={[0.2, 20]} />
-              <meshStandardMaterial color="#3b2412" roughness={1} />
-            </mesh>
-            <mesh position={[0, 0, 0.002]}>
-              <ringGeometry args={[0.2, 0.26, 20]} />
-              <meshStandardMaterial color="#8f5f33" roughness={1} />
-            </mesh>
-          </group>
-        )),
-      )}
+      {/* Threaded holes stay behind once a screw is out: two instanced draws for all of them. */}
+      <Holes key={level.id} points={level.plates.flatMap((p) => p.screws.map((s) => [s.x, s.y] as [number, number]))} />
     </group>
   )
 }
 
 const RIM = '#ffc928'
+const boxTarget = new Vector3()
 
 function Box({ box, index }: { box: BoxState; index: number }) {
   const group = useRef<Group>(null)
@@ -82,7 +98,7 @@ function Box({ box, index }: { box: BoxState; index: number }) {
       born.current = now
       g.position.set(index === 0 ? -9 : 9, LAYOUT.boxY, 0)
     }
-    const target = new Vector3(index === 0 ? -LAYOUT.boxX : LAYOUT.boxX, LAYOUT.boxY, 0)
+    const target = boxTarget.set(index === 0 ? -LAYOUT.boxX : LAYOUT.boxX, LAYOUT.boxY, 0)
     if (box.leaving) {
       if (leftAt.current < 0) {
         leftAt.current = now
@@ -108,15 +124,15 @@ function Box({ box, index }: { box: BoxState; index: number }) {
   return (
     <group ref={group}>
       {/* Parts organiser after the concept: coloured shell, three compartments, a clear lid with a yellow rim and latch. */}
-      <RoundedBox args={[2.8, 1.25, 0.7]} radius={0.18} castShadow>
+      <RoundedBox smoothness={2} bevelSegments={2} args={[2.8, 1.25, 0.7]} radius={0.18} castShadow>
         <meshStandardMaterial color={color} roughness={0.35} />
       </RoundedBox>
-      <RoundedBox args={[2.8, 0.14, 0.72]} radius={0.06} position={[0, 0.58, 0.01]}>
+      <RoundedBox smoothness={2} bevelSegments={2} args={[2.8, 0.14, 0.72]} radius={0.06} position={[0, 0.58, 0.01]}>
         <meshStandardMaterial color={RIM} roughness={0.35} />
       </RoundedBox>
       {[0, 1, 2].map((i) => (
         <group key={i} position={[(i - 1) * LAYOUT.boxSlotGap, 0.03, 0.3]}>
-          <RoundedBox args={[0.7, 0.84, 0.1]} radius={0.08}>
+          <RoundedBox smoothness={2} bevelSegments={2} args={[0.7, 0.84, 0.1]} radius={0.08}>
             <meshStandardMaterial color="#1d2a52" roughness={0.7} />
           </RoundedBox>
           <mesh position={[0, 0, 0.06]}>
@@ -126,13 +142,13 @@ function Box({ box, index }: { box: BoxState; index: number }) {
         </group>
       ))}
       <group ref={lid} position={[0, 0.6, 0.36]}>
-        <RoundedBox args={[2.8, 1.25, 0.08]} radius={0.06} position={[0, -0.62, 0.02]}>
+        <RoundedBox smoothness={2} bevelSegments={2} args={[2.8, 1.25, 0.08]} radius={0.06} position={[0, -0.62, 0.02]}>
           <meshPhysicalMaterial color="#dff3ff" transparent opacity={0.35} roughness={0.05} clearcoat={1} depthWrite={false} />
         </RoundedBox>
-        <RoundedBox args={[2.86, 1.3, 0.05]} radius={0.06} position={[0, -0.62, -0.01]}>
+        <RoundedBox smoothness={2} bevelSegments={2} args={[2.86, 1.3, 0.05]} radius={0.06} position={[0, -0.62, -0.01]}>
           <meshStandardMaterial color={RIM} transparent opacity={0.9} />
         </RoundedBox>
-        <RoundedBox args={[0.5, 0.2, 0.08]} radius={0.04} position={[0, -1.22, 0.06]}>
+        <RoundedBox smoothness={2} bevelSegments={2} args={[0.5, 0.2, 0.08]} radius={0.04} position={[0, -1.22, 0.06]}>
           <meshStandardMaterial color={RIM} roughness={0.35} />
         </RoundedBox>
       </group>
@@ -158,11 +174,11 @@ export function Tray() {
   return (
     <group>
       {/* Steel magnetic tray with a pocket per slot; glows red when one slot is left */}
-      <RoundedBox args={[n * LAYOUT.traySlotGap + 0.45, 1.35, 0.3]} radius={0.22} position={[0, LAYOUT.trayY, 0]} receiveShadow castShadow>
+      <RoundedBox smoothness={2} bevelSegments={2} args={[n * LAYOUT.traySlotGap + 0.45, 1.35, 0.3]} radius={0.22} position={[0, LAYOUT.trayY, 0]} receiveShadow castShadow>
         <meshStandardMaterial color={danger ? '#c9505e' : '#aeb8cc'} roughness={0.25} metalness={0.85} emissive={danger ? '#5a0010' : '#000'} emissiveIntensity={0.4} />
       </RoundedBox>
       {Array.from({ length: n }, (_, i) => (
-        <RoundedBox key={i} args={[LAYOUT.traySlotGap - 0.18, 1.0, 0.1]} radius={0.12} position={traySlotPos(i, n).setZ(0.12)}>
+        <RoundedBox smoothness={2} bevelSegments={2} key={i} args={[LAYOUT.traySlotGap - 0.18, 1.0, 0.1]} radius={0.12} position={traySlotPos(i, n).setZ(0.12)}>
           <meshStandardMaterial color="#6b768e" roughness={0.35} metalness={0.8} />
         </RoundedBox>
       ))}

@@ -1,6 +1,6 @@
 import { useFrame } from '@react-three/fiber'
 import { useMemo, useRef } from 'react'
-import { Color, ExtrudeGeometry, Path, Shape, type Group, type MeshPhysicalMaterial } from 'three'
+import { Color, ExtrudeGeometry, Path, Shape, type Group, type MeshStandardMaterial } from 'three'
 import { getBody } from '../game/physics'
 import { useGame } from '../game/store'
 import type { PlateDef } from '../game/types'
@@ -42,14 +42,14 @@ function plateGeometry(def: PlateDef) {
     hole.absarc(dx * c - dy * s, dx * s + dy * c, 0.2, 0, Math.PI * 2, true)
     shape.holes.push(hole)
   }
-  const geo = new ExtrudeGeometry(shape, { depth: DEPTH, bevelEnabled: true, bevelSize: 0.04, bevelThickness: 0.03, bevelSegments: 2, curveSegments: def.shape === 'disc' ? 48 : 16 })
+  const geo = new ExtrudeGeometry(shape, { depth: DEPTH, bevelEnabled: true, bevelSize: 0.04, bevelThickness: 0.03, bevelSegments: 1, curveSegments: def.shape === 'disc' ? 28 : 8 })
   geo.translate(0, 0, -DEPTH / 2)
   return geo
 }
 
 export function Plate({ def }: { def: PlateDef }) {
   const group = useRef<Group>(null)
-  const mat = useRef<MeshPhysicalMaterial>(null)
+  const mat = useRef<MeshStandardMaterial>(null)
   const geometry = useMemo(() => plateGeometry(def), [def])
   const side = useMemo(() => new Color(def.tint).multiplyScalar(0.62), [def.tint])
   const flash = useRef(0)
@@ -81,16 +81,8 @@ export function Plate({ def }: { def: PlateDef }) {
   return (
     <group ref={group}>
       <mesh geometry={geometry} renderOrder={def.layer + 1} castShadow receiveShadow>
-        <meshPhysicalMaterial
-          attach="material-1"
-          color={side}
-          transparent
-          opacity={0.95}
-          roughness={0.3}
-          clearcoat={0.4}
-          depthWrite={false}
-        />
-        <meshPhysicalMaterial
+        <meshStandardMaterial attach="material-1" color={side} transparent opacity={0.95} roughness={0.3} depthWrite={false} />
+        <meshStandardMaterial
           attach="material-0"
           ref={mat}
           color={def.tint}
@@ -98,8 +90,6 @@ export function Plate({ def }: { def: PlateDef }) {
           opacity={0.86}
           roughness={0.22}
           metalness={0}
-          clearcoat={0.6}
-          clearcoatRoughness={0.12}
           emissive="#ffffff"
           emissiveIntensity={0}
           depthWrite={false}

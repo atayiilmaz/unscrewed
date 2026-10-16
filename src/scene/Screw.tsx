@@ -1,9 +1,10 @@
 import { useFrame, type ThreeEvent } from '@react-three/fiber'
-import { useRef } from 'react'
+import { useMemo, useRef } from 'react'
 import { Color, CylinderGeometry, ExtrudeGeometry, LatheGeometry, Shape, Vector2, Vector3, type Group } from 'three'
 import { useGame } from '../game/store'
 import type { Head } from '../game/types'
 import { emit } from './Particles'
+import { StaticMerge } from './StaticMerge'
 import { boxAnchors, boxSlotOffset, COLORS, plateZ, SCREW_Z_ABOVE_PLATE, traySlotPos, unscrewSeconds } from './layout'
 
 /** Domed pan head, turned on a lathe and stood up to face the camera. */
@@ -17,7 +18,7 @@ const headGeo = new LatheGeometry(
     [0.12, 0.125],
     [0.0001, 0.13],
   ].map(([x, y]) => new Vector2(x, y)),
-  32,
+  20,
 )
 headGeo.rotateX(Math.PI / 2)
 /** Threaded shank: a zig-zag profile, tapering to a point. */
@@ -28,10 +29,10 @@ const shaftGeo = new LatheGeometry(
     new Vector2(0.09, 0),
     new Vector2(0.0001, 0),
   ],
-  16,
+  8,
 )
 shaftGeo.rotateX(Math.PI / 2)
-const washerGeo = new CylinderGeometry(0.37, 0.37, 0.035, 32)
+const washerGeo = new CylinderGeometry(0.37, 0.37, 0.035, 20, 1, true)
 washerGeo.rotateX(Math.PI / 2)
 washerGeo.translate(0, 0, -0.015)
 const RUST = new Color('#8a4b1f')
@@ -57,11 +58,11 @@ export function HeadMark({ head }: { head: Head }) {
         <group position={[0, 0, z]}>
           <mesh>
             <boxGeometry args={[0.36, 0.07, 0.03]} />
-            <meshStandardMaterial color={RECESS} />
+            <meshStandardMaterial color={RECESS} roughness={0.28} metalness={0.35} />
           </mesh>
           <mesh>
             <boxGeometry args={[0.07, 0.36, 0.03]} />
-            <meshStandardMaterial color={RECESS} />
+            <meshStandardMaterial color={RECESS} roughness={0.28} metalness={0.35} />
           </mesh>
         </group>
       )
@@ -69,25 +70,26 @@ export function HeadMark({ head }: { head: Head }) {
       return (
         <mesh position={[0, 0, z]}>
           <boxGeometry args={[0.44, 0.08, 0.03]} />
-          <meshStandardMaterial color={RECESS} />
+          <meshStandardMaterial color={RECESS} roughness={0.28} metalness={0.35} />
         </mesh>
       )
     case 'hex':
       return (
         <mesh position={[0, 0, z]} geometry={hexGeo}>
-          <meshStandardMaterial color={RECESS} />
+          <meshStandardMaterial color={RECESS} roughness={0.28} metalness={0.35} />
         </mesh>
       )
     case 'torx':
       return (
         <mesh position={[0, 0, z - 0.02]} geometry={torxGeo}>
-          <meshStandardMaterial color={RECESS} />
+          <meshStandardMaterial color={RECESS} roughness={0.28} metalness={0.35} />
         </mesh>
       )
   }
 }
 
 const tmp = new Vector3()
+const offset = new Vector3()
 
 export function Screw({ id }: { id: string }) {
   const screw = useGame((s) => s.game.screws[id])
@@ -100,7 +102,7 @@ export function Screw({ id }: { id: string }) {
   const spin = useRef<Group>(null)
   const state = useRef({ removedAt: -1, status: screw.status, shake: 0, lastSeq: 0, rustKick: 0 })
 
-  const boardPos = new Vector3(screw.def.x, screw.def.y, plateZ(layer) + SCREW_Z_ABOVE_PLATE)
+  const boardPos = useMemo(() => new Vector3(screw.def.x, screw.def.y, plateZ(layer) + SCREW_Z_ABOVE_PLATE), [screw.def, layer])
 
   useFrame(({ clock }, dt) => {
     const g = group.current
@@ -145,14 +147,14 @@ export function Screw({ id }: { id: string }) {
     }
 
     if (screw.status === 'tray') {
-      tmp.copy(traySlotPos(screw.slot!, trayLen))
+      traySlotPos(screw.slot!, trayLen, tmp)
     } else {
       const anchor = boxAnchors.get(screw.boxUid!)
       if (!anchor) {
         g.visible = false
         return
       }
-      tmp.copy(anchor).add(boxSlotOffset(screw.slot!))
+      tmp.copy(anchor).add(boxSlotOffset(screw.slot!, offset))
     }
     g.visible = true
     g.position.lerp(tmp, 1 - Math.exp(-dt * 14))
@@ -170,6 +172,7 @@ export function Screw({ id }: { id: string }) {
   return (
     <group ref={group} onPointerDown={onDown}>
       <group ref={spin}>
+        <StaticMerge key={screw.rustLeft}>
         <mesh geometry={headGeo} position={[0, 0, 0.02]} castShadow>
           <meshStandardMaterial color={color} roughness={rusty ? 0.9 : 0.28} metalness={rusty ? 0.15 : 0.35} />
         </mesh>
@@ -177,7 +180,7 @@ export function Screw({ id }: { id: string }) {
           <HeadMark head={screw.def.head} />
         </group>
         <mesh geometry={washerGeo}>
-          <meshStandardMaterial color="#c9ced8" metalness={0.9} roughness={0.25} />
+          <meshStandardMaterial color="#c9ced8" metalness={0.9} roughness={0.3} />
         </mesh>
         <mesh geometry={shaftGeo}>
           <meshStandardMaterial color="#aab2c0" metalness={0.9} roughness={0.3} />
@@ -185,9 +188,10 @@ export function Screw({ id }: { id: string }) {
         {rusty && (
           <mesh position={[0, 0, 0.06]}>
             <torusGeometry args={[0.3, 0.025 + 0.012 * screw.rustLeft, 8, 28]} />
-            <meshStandardMaterial color="#7a3f17" roughness={1} />
+            <meshStandardMaterial color="#7a3f17" roughness={0.9} metalness={0.15} />
           </mesh>
         )}
+        </StaticMerge>
       </group>
       {/* Larger invisible hit area for fingers. */}
       <mesh visible={false}>

@@ -2,6 +2,8 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { useEffect, useRef } from 'react'
 import { Vector3, type OrthographicCamera } from 'three'
 import { useGame } from '../game/store'
+import { Stats } from '../scene/Stats'
+import { AdaptiveDpr, maxDpr } from '../scene/AdaptiveDpr'
 import { Particles } from '../scene/Particles'
 import { LabelProjector } from './labels'
 import { Mechanic } from './Mechanic'
@@ -23,6 +25,26 @@ function ReadySignal() {
   const frames = useRef(0)
   useFrame(() => {
     if (++frames.current === 3) markReady()
+  })
+  return null
+}
+
+/**
+ * Everything that casts a shadow in the workshop is static, so the shadow map is redrawn only
+ * after something changes (boot, purchases, level-ups) instead of every frame.
+ */
+function ShadowsOnDemand() {
+  const { gl } = useThree()
+  const until = useRef(0)
+  useEffect(() => {
+    gl.shadowMap.autoUpdate = false
+    until.current = performance.now() + 1500
+    return useGame.subscribe((s, prev) => {
+      if (s.profile.decor !== prev.profile.decor || s.profile.upgrades !== prev.profile.upgrades) until.current = performance.now() + 1200
+    })
+  }, [gl])
+  useFrame(() => {
+    if (performance.now() < until.current) gl.shadowMap.needsUpdate = true
   })
   return null
 }
@@ -121,7 +143,8 @@ export function HomeScene() {
       className="home-canvas"
       orthographic
       shadows={high}
-      dpr={high ? [1, 2] : 1}
+      dpr={maxDpr(high)}
+      gl={{ antialias: !high || maxDpr(high) < 2, powerPreference: 'high-performance' }}
       camera={{ position: [40, 40, 40], zoom: 25, near: 0.1, far: 200 }}
     >
       <color attach="background" args={['#9fd4ff']} />
@@ -139,12 +162,15 @@ export function HomeScene() {
         shadow-camera-bottom={-18}
         shadow-bias={-0.0004}
       />
+      <AdaptiveDpr high={high} />
       <CameraRig />
+      {high && <ShadowsOnDemand />}
       <ReadySignal />
       <World />
       <Room />
       <Mechanic />
       <Particles />
+      {import.meta.env.DEV && <Stats name="home" />}
       <LabelProjector />
     </Canvas>
   )

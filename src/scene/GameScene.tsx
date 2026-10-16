@@ -5,6 +5,8 @@ import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment
 import { stepPhysics } from '../game/physics'
 import { useGame } from '../game/store'
 import { Backdrop, Board, Boxes, FitCamera, Tray } from './Field'
+import { Stats } from './Stats'
+import { AdaptiveDpr, maxDpr } from './AdaptiveDpr'
 import { Particles } from './Particles'
 import { Plate } from './Plate'
 import { Screw } from './Screw'
@@ -47,7 +49,7 @@ export function GameScene({ active }: { active: boolean }) {
   const runId = useGame((s) => s.runId)
   const high = useGame((s) => s.profile.settings.quality === 'high')
   return (
-    <Canvas frameloop={active ? 'always' : 'never'} shadows={high} dpr={high ? [1, 2] : 1} gl={{ toneMapping: NeutralToneMapping }} camera={{ fov: 38, near: 0.1, far: 100 }}>
+    <Canvas frameloop={active ? 'always' : 'never'} shadows={high} dpr={maxDpr(high)} gl={{ toneMapping: NeutralToneMapping, antialias: !high || maxDpr(high) < 2, powerPreference: 'high-performance' }} camera={{ fov: 38, near: 0.1, far: 100 }}>
       <color attach="background" args={['#18213d']} />
       <Env />
       <ambientLight intensity={0.25} />
@@ -62,6 +64,7 @@ export function GameScene({ active }: { active: boolean }) {
         shadow-camera-bottom={-10}
         shadow-bias={-0.0005}
       />
+      <AdaptiveDpr high={high} />
       <FitCamera />
       <Physics />
       <Backdrop />
@@ -73,6 +76,7 @@ export function GameScene({ active }: { active: boolean }) {
       <Tray />
       <Screwdriver />
       <Particles />
+      {import.meta.env.DEV && <Stats name="game" />}
     </Canvas>
   )
 }

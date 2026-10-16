@@ -10,6 +10,7 @@ import { COLORS } from '../scene/layout'
 import { iconUrl } from '../ui/art'
 import { BENCH, DECOR_SPOTS, ROOM, STATIONS } from './layout'
 import { STATION_MODELS } from './Stations'
+import { StaticMerge } from '../scene/StaticMerge'
 import { floorTexture, woodTexture } from '../scene/textures'
 
 const { w: RW, d: RD, wall: WH } = ROOM
@@ -84,7 +85,7 @@ function Walls() {
           <boxGeometry args={[6.2, 1.1, 0.16]} />
           <meshStandardMaterial color="#1b2140" />
         </mesh>
-        <mesh position={[0, WH + 0.55, 0]}>
+        <mesh position={[0, WH + 0.55, 0]} userData={{ noMerge: true }}>
           <planeGeometry args={[6, 1]} />
           <meshStandardMaterial map={sign} emissive="#ffffff" emissiveMap={sign} emissiveIntensity={0.35} />
         </mesh>
@@ -146,7 +147,7 @@ function JobModel() {
   const s = 0.13
   return (
     <group ref={ref} position={[0, BENCH.top + 0.08, BENCH.pos[2] + 0.05]} rotation-x={-Math.PI / 2 + 0.25}>
-      <RoundedBox args={[8.6 * s, 9.8 * s, 0.08]} radius={0.03} position={[0, 0, -0.05]} castShadow>
+      <RoundedBox smoothness={2} bevelSegments={2} args={[8.6 * s, 9.8 * s, 0.08]} radius={0.03} position={[0, 0, -0.05]} castShadow>
         <meshStandardMaterial color="#c9783a" />
       </RoundedBox>
       {level.plates.map((p) => (
@@ -157,7 +158,7 @@ function JobModel() {
               <meshStandardMaterial color={p.tint} transparent opacity={0.9} />
             </mesh>
           ) : (
-            <RoundedBox args={[p.w * s, p.h * s, 0.02]} radius={0.008}>
+            <RoundedBox smoothness={2} bevelSegments={2} args={[p.w * s, p.h * s, 0.02]} radius={0.008}>
               <meshStandardMaterial color={p.tint} transparent opacity={0.9} />
             </RoundedBox>
           )}
@@ -189,10 +190,10 @@ function Bench() {
         play()
       }}
     >
-      <RoundedBox args={[BENCH.w, 0.16, BENCH.d]} radius={0.05} position={[0, BENCH.top - 0.08, 0]} castShadow receiveShadow>
+      <RoundedBox smoothness={2} bevelSegments={2} args={[BENCH.w, 0.16, BENCH.d]} radius={0.05} position={[0, BENCH.top - 0.08, 0]} castShadow receiveShadow>
         <meshStandardMaterial map={wood} />
       </RoundedBox>
-      <RoundedBox args={[BENCH.w - 0.2, 0.7, BENCH.d - 0.15]} radius={0.05} position={[0, 0.45, 0]} castShadow>
+      <RoundedBox smoothness={2} bevelSegments={2} args={[BENCH.w - 0.2, 0.7, BENCH.d - 0.15]} radius={0.05} position={[0, 0.45, 0]} castShadow>
         <meshStandardMaterial color="#7a4a2a" />
       </RoundedBox>
       {[-1.2, 0, 1.2].map((x) => (
@@ -212,7 +213,11 @@ function Spin({ speed, children, axis = 'y' }: { speed: number; children: ReactN
   useFrame((_, dt) => {
     if (ref.current) ref.current.rotation[axis] -= dt * speed
   })
-  return <group ref={ref}>{children}</group>
+  return (
+    <group ref={ref} userData={{ noMerge: true }}>
+      {children}
+    </group>
+  )
 }
 
 function Bob({ amp = 0.03, speed = 2, children }: { amp?: number; speed?: number; children: ReactNode }) {
@@ -220,7 +225,11 @@ function Bob({ amp = 0.03, speed = 2, children }: { amp?: number; speed?: number
   useFrame(({ clock }) => {
     if (ref.current) ref.current.position.y = Math.abs(Math.sin(clock.elapsedTime * speed)) * amp
   })
-  return <group ref={ref}>{children}</group>
+  return (
+    <group ref={ref} userData={{ noMerge: true }}>
+      {children}
+    </group>
+  )
 }
 
 /** Framed poster on the wall, showing the poster artwork from the icon sheet. */
@@ -266,7 +275,6 @@ const decorModels: Record<DecorId, ReactNode> = {
         <sphereGeometry args={[0.07, 10, 8]} />
         <meshStandardMaterial color="#fff" emissive="#fff3c4" emissiveIntensity={1.5} />
       </mesh>
-      <pointLight position={[0.35, 0.5, 0.1]} intensity={3} distance={3} color="#ffd98a" />
     </group>
   ),
   vise: (
@@ -293,7 +301,7 @@ const decorModels: Record<DecorId, ReactNode> = {
     <Bob amp={0.03} speed={4}>
       <Table w={0.9} d={0.6} h={0.7} />
       <group position={[0, 0.76, 0]}>
-        <RoundedBox args={[0.7, 0.42, 0.3]} radius={0.06} position={[0, 0.21, 0]} castShadow>
+        <RoundedBox smoothness={2} bevelSegments={2} args={[0.7, 0.42, 0.3]} radius={0.06} position={[0, 0.21, 0]} castShadow>
           <meshStandardMaterial color="#35d9a0" />
         </RoundedBox>
         <mesh position={[-0.15, 0.21, 0.16]}>
@@ -342,7 +350,7 @@ const decorModels: Record<DecorId, ReactNode> = {
   poster: <Poster />,
   toolbox: (
     <group>
-      <RoundedBox args={[1.0, 0.5, 0.55]} radius={0.06} position={[0, 0.25, 0]} castShadow>
+      <RoundedBox smoothness={2} bevelSegments={2} args={[1.0, 0.5, 0.55]} radius={0.06} position={[0, 0.25, 0]} castShadow>
         <meshStandardMaterial color="#ff4f5e" />
       </RoundedBox>
       <mesh position={[0, 0.25, 0.28]}>
@@ -374,14 +382,14 @@ const decorModels: Record<DecorId, ReactNode> = {
   robot: (
     <Bob amp={0.05} speed={1.6}>
       {/* Colourful toy robot: blue body, yellow chest plate, red joints */}
-      <RoundedBox args={[0.56, 0.56, 0.42]} radius={0.08} position={[0, 0.62, 0]} castShadow>
+      <RoundedBox smoothness={2} bevelSegments={2} args={[0.56, 0.56, 0.42]} radius={0.08} position={[0, 0.62, 0]} castShadow>
         <meshStandardMaterial color="#2f63d8" />
       </RoundedBox>
-      <RoundedBox args={[0.32, 0.28, 0.05]} radius={0.03} position={[0, 0.62, 0.22]}>
+      <RoundedBox smoothness={2} bevelSegments={2} args={[0.32, 0.28, 0.05]} radius={0.03} position={[0, 0.62, 0.22]}>
         <meshStandardMaterial color="#ffc928" />
       </RoundedBox>
       <Spin speed={0.8}>
-        <RoundedBox args={[0.5, 0.38, 0.4]} radius={0.08} position={[0, 1.12, 0]} castShadow>
+        <RoundedBox smoothness={2} bevelSegments={2} args={[0.5, 0.38, 0.4]} radius={0.08} position={[0, 1.12, 0]} castShadow>
           <meshStandardMaterial color="#2f63d8" />
         </RoundedBox>
         {[-0.11, 0.11].map((x) => (
@@ -418,7 +426,7 @@ const decorModels: Record<DecorId, ReactNode> = {
         </group>
       ))}
       {[-0.14, 0.14].map((x) => (
-        <RoundedBox key={x} args={[0.16, 0.34, 0.22]} radius={0.04} position={[x, 0.17, 0]}>
+        <RoundedBox smoothness={2} bevelSegments={2} key={x} args={[0.16, 0.34, 0.22]} radius={0.04} position={[x, 0.17, 0]}>
           <meshStandardMaterial color="#e0453f" />
         </RoundedBox>
       ))}
@@ -426,7 +434,7 @@ const decorModels: Record<DecorId, ReactNode> = {
   ),
   trophy: (
     <Spin speed={0.6}>
-      <RoundedBox args={[0.32, 0.16, 0.32]} radius={0.03} position={[0, 0.08, 0]}>
+      <RoundedBox smoothness={2} bevelSegments={2} args={[0.32, 0.16, 0.32]} radius={0.03} position={[0, 0.08, 0]}>
         <meshStandardMaterial color="#1f2233" roughness={0.5} />
       </RoundedBox>
       <mesh position={[0, 0.1, 0.162]}>
@@ -492,7 +500,9 @@ function DecorSlot({ id }: { id: DecorId }) {
   return (
     <group position={spot.pos} rotation-y={spot.rot ?? 0}>
       {owned ? (
-        <PopIn fresh={fresh}>{decorModels[id]}</PopIn>
+        <PopIn fresh={fresh}>
+          <StaticMerge>{decorModels[id]}</StaticMerge>
+        </PopIn>
       ) : next ? (
         <mesh
           position={[0, 0.3, 0]}
@@ -534,17 +544,22 @@ function Station({ id }: { id: UpgradeId }) {
       }}
     >
       <PopIn key={`${level}-${fresh || 0}`} fresh={!!fresh}>
-        <Model level={level} />
+        <StaticMerge>
+          <Model level={level} />
+        </StaticMerge>
       </PopIn>
     </group>
   )
 }
 
 export function Room() {
+  const lang = useGame((s) => s.profile.lang)
   return (
     <group>
-      <Walls />
-      <Bench />
+      <StaticMerge key={lang}>
+        <Walls />
+        <Bench />
+      </StaticMerge>
       <JobModel />
       {UPGRADE_IDS.map((id) => (
         <Station key={id} id={id} />

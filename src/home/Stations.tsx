@@ -26,10 +26,10 @@ function Cabinet({ w, d, h, drawers, open = false }: { w: number; d: number; h: 
   const wood = useWood(w / 2, 0.5)
   return (
     <group>
-      <RoundedBox args={[w, h - 0.1, d]} radius={0.06} position={[0, (h - 0.1) / 2, 0]} castShadow receiveShadow>
+      <RoundedBox smoothness={2} bevelSegments={2} args={[w, h - 0.1, d]} radius={0.06} position={[0, (h - 0.1) / 2, 0]} castShadow receiveShadow>
         <meshStandardMaterial color={BLUE} roughness={0.55} />
       </RoundedBox>
-      <RoundedBox args={[w + 0.12, 0.12, d + 0.1]} radius={0.04} position={[0, h - 0.04, 0]} castShadow receiveShadow>
+      <RoundedBox smoothness={2} bevelSegments={2} args={[w + 0.12, 0.12, d + 0.1]} radius={0.04} position={[0, h - 0.04, 0]} castShadow receiveShadow>
         <meshStandardMaterial map={wood} />
       </RoundedBox>
       {Array.from({ length: drawers }, (_, i) => {
@@ -37,7 +37,7 @@ function Cabinet({ w, d, h, drawers, open = false }: { w: number; d: number; h: 
         const x = -w / 2 + 0.1 + dw * (i + 0.5)
         return (
           <group key={i} position={[x, h * 0.62, d / 2 + 0.01]}>
-            <RoundedBox args={[dw - 0.06, h * 0.28, 0.04]} radius={0.02}>
+            <RoundedBox smoothness={2} bevelSegments={2} args={[dw - 0.06, h * 0.28, 0.04]} radius={0.02}>
               <meshStandardMaterial color={BLUE_DARK} roughness={0.5} />
             </RoundedBox>
             <mesh position={[0, 0, 0.03]}>
@@ -59,7 +59,7 @@ function Cabinet({ w, d, h, drawers, open = false }: { w: number; d: number; h: 
 
 function Bin({ color, x, y = 0, z = 0 }: { color: string; x: number; y?: number; z?: number }) {
   return (
-    <RoundedBox args={[0.42, 0.22, 0.32]} radius={0.04} position={[x, y + 0.11, z]} castShadow>
+    <RoundedBox smoothness={2} bevelSegments={2} args={[0.42, 0.22, 0.32]} radius={0.04} position={[x, y + 0.11, z]} castShadow>
       <meshStandardMaterial color={color} roughness={0.5} />
     </RoundedBox>
   )
@@ -68,7 +68,7 @@ function Bin({ color, x, y = 0, z = 0 }: { color: string; x: number; y?: number;
 function Crate({ x, y = 0, z = 0 }: { x: number; y?: number; z?: number }) {
   const wood = useWood(0.3, 0.3)
   return (
-    <RoundedBox args={[0.4, 0.26, 0.32]} radius={0.02} position={[x, y + 0.13, z]} castShadow>
+    <RoundedBox smoothness={2} bevelSegments={2} args={[0.4, 0.26, 0.32]} radius={0.02} position={[x, y + 0.13, z]} castShadow>
       <meshStandardMaterial map={wood} color="#c9a07a" />
     </RoundedBox>
   )
@@ -150,18 +150,18 @@ function ToolWall({ level }: { level: number }) {
         [0, 1.95 + H / 2 - 0.06, W, 0.14],
         [0, 1.95 - H / 2 + 0.06, W, 0.14],
       ].map(([x, y, w, h], i) => (
-        <RoundedBox key={i} args={[w, h, 0.16]} radius={0.03} position={[x, y, 0.12]} castShadow>
+        <RoundedBox smoothness={2} bevelSegments={2} key={i} args={[w, h, 0.16]} radius={0.03} position={[x, y, 0.12]} castShadow>
           <meshStandardMaterial map={wood} color={ORANGE_WOOD} />
         </RoundedBox>
       ))}
       {[-1, 1].map((side) => (
-        <RoundedBox key={side} args={[0.14, H, 0.16]} radius={0.03} position={[side * (W / 2 - 0.07), 1.95, 0.12]} castShadow>
+        <RoundedBox smoothness={2} bevelSegments={2} key={side} args={[0.14, H, 0.16]} radius={0.03} position={[side * (W / 2 - 0.07), 1.95, 0.12]} castShadow>
           <meshStandardMaterial map={wood} color={ORANGE_WOOD} />
         </RoundedBox>
       ))}
       {[-1, 1].flatMap((sx) =>
         [-1, 1].map((sy) => (
-          <RoundedBox key={`${sx}${sy}`} args={[0.24, 0.24, 0.2]} radius={0.04} position={[sx * (W / 2 - 0.07), 1.95 + sy * (H / 2 - 0.06), 0.14]}>
+          <RoundedBox smoothness={2} bevelSegments={2} key={`${sx}${sy}`} args={[0.24, 0.24, 0.2]} radius={0.04} position={[sx * (W / 2 - 0.07), 1.95 + sy * (H / 2 - 0.06), 0.14]}>
             <meshStandardMaterial color={BLUE} />
           </RoundedBox>
         )),
@@ -170,7 +170,7 @@ function ToolWall({ level }: { level: number }) {
       {level >= 3 && (
         <group>
           {/* Gold wrench plaque and a hammer for the full kit */}
-          <RoundedBox args={[0.9, 0.3, 0.08]} radius={0.06} position={[0, 1.95 + H / 2 + 0.1, 0.2]}>
+          <RoundedBox smoothness={2} bevelSegments={2} args={[0.9, 0.3, 0.08]} radius={0.06} position={[0, 1.95 + H / 2 + 0.1, 0.2]}>
             <meshStandardMaterial color="#ffc928" metalness={0.6} roughness={0.3} emissive="#7a5200" emissiveIntensity={0.3} />
           </RoundedBox>
           <group position={[1.18, 1.7, 0.22]} rotation-z={0.1}>
@@ -199,7 +199,7 @@ function TrayTable({ level }: { level: number }) {
       <Cabinet w={width} d={0.95} h={0.95} drawers={level + 1} open={level >= 1} />
       {Array.from({ length: trays }, (_, i) => (
         <group key={i} position={[-((trays - 1) * 0.42) + i * 0.84, 1.03, 0]}>
-          <RoundedBox args={[0.72, 0.1, 0.55]} radius={0.03}>
+          <RoundedBox smoothness={2} bevelSegments={2} args={[0.72, 0.1, 0.55]} radius={0.03}>
             <meshStandardMaterial color="#9aa6bd" metalness={0.75} roughness={0.3} />
           </RoundedBox>
           {[0, 1, 2, 3, 4].map((k) => (
@@ -280,7 +280,7 @@ function RustStation({ level }: { level: number }) {
               <meshStandardMaterial color={['#ff4f5e', '#3d8bff', '#ffc928'][i]} metalness={0.3} roughness={0.35} />
             </mesh>
           ))}
-          <RoundedBox args={[0.3, 0.32, 0.18]} radius={0.04} position={[0.15, 0.55, 0]}>
+          <RoundedBox smoothness={2} bevelSegments={2} args={[0.3, 0.32, 0.18]} radius={0.04} position={[0.15, 0.55, 0]}>
             <meshStandardMaterial color="#3fa34d" />
           </RoundedBox>
           <mesh position={[-0.6, 0.15, 0.35]}>
@@ -292,7 +292,7 @@ function RustStation({ level }: { level: number }) {
       {level >= 2 && (
         <group position={[1.05, 0, 0]}>
           {/* Teal oiling machine with a gauge and a hose */}
-          <RoundedBox args={[0.7, 1.2, 0.55]} radius={0.12} position={[0, 0.65, 0]} castShadow>
+          <RoundedBox smoothness={2} bevelSegments={2} args={[0.7, 1.2, 0.55]} radius={0.12} position={[0, 0.65, 0]} castShadow>
             <meshStandardMaterial color="#35c9b4" roughness={0.45} />
           </RoundedBox>
           <mesh position={[0, 1.45, 0]}>
@@ -335,10 +335,10 @@ function CoinStack({ x, z, n }: { x: number; z: number; n: number }) {
 function Register({ gold }: { gold: boolean }) {
   return (
     <group>
-      <RoundedBox args={[0.7, 0.32, 0.55]} radius={0.06} position={[0, 0.16, 0]} castShadow>
+      <RoundedBox smoothness={2} bevelSegments={2} args={[0.7, 0.32, 0.55]} radius={0.06} position={[0, 0.16, 0]} castShadow>
         <meshStandardMaterial color={gold ? '#ffc928' : '#e0453f'} metalness={gold ? 0.75 : 0.1} roughness={0.3} />
       </RoundedBox>
-      <RoundedBox args={[0.5, 0.06, 0.3]} radius={0.02} position={[0, 0.34, 0.06]}>
+      <RoundedBox smoothness={2} bevelSegments={2} args={[0.5, 0.06, 0.3]} radius={0.02} position={[0, 0.34, 0.06]}>
         <meshStandardMaterial color={DARK} />
       </RoundedBox>
       <mesh position={[0, 0.55, -0.15]} rotation-x={-0.25}>
@@ -386,7 +386,7 @@ function Counter({ level }: { level: number }) {
       {level >= 3 && <CoinStack x={-0.65} z={-0.12} n={level * 2} />}
       {level >= 4 && <CoinStack x={-0.95} z={0.18} n={level + 3} />}
       {level >= 1 && (
-        <mesh ref={ref} position={[0, 1.7, 0.5]} rotation-x={Math.PI / 2}>
+        <mesh ref={ref} position={[0, 1.7, 0.5]} rotation-x={Math.PI / 2} userData={{ noMerge: true }}>
           <cylinderGeometry args={[0.16, 0.16, 0.04, 16]} />
           <meshStandardMaterial color="#ffc928" metalness={0.7} roughness={0.25} emissive="#ffb000" emissiveIntensity={0.4} />
         </mesh>
@@ -424,10 +424,10 @@ function Drill({ level }: { level: number }) {
       <group>
         <Stool />
         <group position={[0, 0.8, 0]} rotation-z={Math.PI / 2}>
-          <RoundedBox args={[0.24, 0.5, 0.2]} radius={0.06}>
+          <RoundedBox smoothness={2} bevelSegments={2} args={[0.24, 0.5, 0.2]} radius={0.06}>
             <meshStandardMaterial color="#3d8bff" />
           </RoundedBox>
-          <RoundedBox args={[0.2, 0.18, 0.18]} radius={0.04} position={[0, -0.3, 0]}>
+          <RoundedBox smoothness={2} bevelSegments={2} args={[0.2, 0.18, 0.18]} radius={0.04} position={[0, -0.3, 0]}>
             <meshStandardMaterial color="#ffc928" />
           </RoundedBox>
           <mesh position={[0, 0.35, 0]}>
@@ -441,17 +441,17 @@ function Drill({ level }: { level: number }) {
   const s = 0.95 + level * 0.07
   return (
     <group scale={s}>
-      <RoundedBox args={[1.1, 0.2, 0.9]} radius={0.05} position={[0, 0.1, 0]} castShadow>
+      <RoundedBox smoothness={2} bevelSegments={2} args={[1.1, 0.2, 0.9]} radius={0.05} position={[0, 0.1, 0]} castShadow>
         <meshStandardMaterial color={level >= 3 ? '#6b3fc4' : DARK} />
       </RoundedBox>
-      <RoundedBox args={[0.5, 0.5, 0.4]} radius={0.06} position={[0, 0.45, -0.15]} castShadow>
+      <RoundedBox smoothness={2} bevelSegments={2} args={[0.5, 0.5, 0.4]} radius={0.06} position={[0, 0.45, -0.15]} castShadow>
         <meshStandardMaterial color={body} />
       </RoundedBox>
       <mesh position={[0, 1.1, -0.25]} castShadow>
         <cylinderGeometry args={[0.08, 0.08, 1.3, 12]} />
         <meshStandardMaterial color={STEEL} metalness={0.8} roughness={0.3} />
       </mesh>
-      <RoundedBox args={[0.6, 0.45, 0.6]} radius={0.1} position={[0, 1.7, 0]} castShadow>
+      <RoundedBox smoothness={2} bevelSegments={2} args={[0.6, 0.45, 0.6]} radius={0.1} position={[0, 1.7, 0]} castShadow>
         <meshStandardMaterial color={body} />
       </RoundedBox>
       <mesh position={[0, 0.82, 0.08]}>
@@ -473,7 +473,7 @@ function Drill({ level }: { level: number }) {
           <meshStandardMaterial color="#e0453f" />
         </mesh>
       </group>
-      <group ref={bit} position={[0, 1.33, 0.1]}>
+      <group ref={bit} position={[0, 1.33, 0.1]} userData={{ noMerge: true }}>
         <mesh>
           <cylinderGeometry args={[0.08, 0.06, 0.2, 10]} />
           <meshStandardMaterial color="#5a6480" metalness={0.7} />
@@ -489,7 +489,6 @@ function Drill({ level }: { level: number }) {
             <sphereGeometry args={[0.08, 12, 10]} />
             <meshStandardMaterial color="#fff" emissive="#ffb02e" emissiveIntensity={1.4} />
           </mesh>
-          <pointLight position={[0, 1.0, 0.3]} color="#c9a8ff" intensity={2.5} distance={2.2} />
         </>
       )}
     </group>

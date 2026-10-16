@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useGame } from '../game/store'
 import type { Key } from '../i18n'
 import { useT } from '../useT'
 import { Icon, type IconName } from './art'
+import { toggleFps } from './FpsMeter'
 
 export const APP_VERSION = '0.4.0'
 export const SUPPORT_EMAIL = 'support@unscrewed.app'
@@ -56,6 +57,7 @@ export function SettingsSheet({ inGame = false }: { inGame?: boolean }) {
   const restart = useGame((s) => s.restart)
   const open = useGame((s) => s.openSheet)
   const [confirm, setConfirm] = useState(false)
+  const versionTaps = useRef(0)
   const [note, setNote] = useState<Key | null>(null)
   const st = profile.settings
 
@@ -155,7 +157,12 @@ export function SettingsSheet({ inGame = false }: { inGame?: boolean }) {
         </div>
       )}
 
-      <p className="version">
+      <p
+        className="version"
+        onClick={() => {
+          if (++versionTaps.current % 5 === 0) toggleFps()
+        }}
+      >
         {t('app.name')} · v{APP_VERSION}
       </p>
     </div>

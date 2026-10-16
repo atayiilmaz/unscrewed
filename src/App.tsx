@@ -4,6 +4,7 @@ import { translate } from './i18n'
 import { music } from './services/music'
 import { GameScene } from './scene/GameScene'
 import { DemoAd, Hud, OfferSheet, Toast } from './ui/Hud'
+import { FpsMeter } from './ui/FpsMeter'
 import { Loader } from './ui/Loader'
 import { Workshop } from './ui/Workshop'
 
@@ -32,6 +33,7 @@ export default function App() {
       <OfferSheet />
       <Toast />
       <DemoAd />
+      <FpsMeter />
       {!booted && <Loader onDone={done} />}
     </div>
   )

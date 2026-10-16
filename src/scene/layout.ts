@@ -25,12 +25,12 @@ export const COLORS: Record<ColorId, string> = {
   orange: '#ff8a2b',
 }
 
-export const traySlotPos = (i: number, n: number) => new Vector3((i - (n - 1) / 2) * LAYOUT.traySlotGap, LAYOUT.trayY, 0.35)
+export const traySlotPos = (i: number, n: number, out = new Vector3()) => out.set((i - (n - 1) / 2) * LAYOUT.traySlotGap, LAYOUT.trayY, 0.35)
 
 /** Live box positions, written by the Boxes component every frame and read by flying screws. */
 export const boxAnchors = new Map<number, Vector3>()
 
-export const boxSlotOffset = (slot: number) => new Vector3((slot - 1) * LAYOUT.boxSlotGap, 0.05, 0.42)
+export const boxSlotOffset = (slot: number, out = new Vector3()) => out.set((slot - 1) * LAYOUT.boxSlotGap, 0.05, 0.42)
 
 /** How long a screw takes to turn out, shortened by the Power Drill skill. */
 export const unscrewSeconds = (speedLevel: number) => 0.3 / (1 + 0.35 * speedLevel)

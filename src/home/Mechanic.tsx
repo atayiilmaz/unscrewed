@@ -7,6 +7,7 @@ import { useGame, type Spot } from '../game/store'
 import { emit } from '../scene/Particles'
 import { RANK_COLORS } from '../ui/art'
 import { BENCH, HUB, SPOTS } from './layout'
+import { StaticMerge } from '../scene/StaticMerge'
 
 /**
  * The workshop mechanic: a jointed low-poly figure animated procedurally. He works at the bench,
@@ -55,7 +56,7 @@ interface Brain {
 
 function Limb({ len, r, color }: { len: number; r: number; color: string }) {
   return (
-    <mesh position={[0, -len / 2, 0]} castShadow>
+    <mesh position={[0, -len / 2, 0]}>
       <capsuleGeometry args={[r, len - r * 2, 4, 10]} />
       <meshStandardMaterial color={color} roughness={0.7} />
     </mesh>
@@ -341,7 +342,7 @@ export function Mechanic() {
                 <cylinderGeometry args={[0.125, 0.125, 0.07, 14]} />
                 <meshStandardMaterial color={DENIM_LIGHT} roughness={0.8} />
               </mesh>
-              <RoundedBox args={[0.22, 0.13, 0.32]} radius={0.06} position={[0, -0.26, 0.05]} castShadow>
+              <RoundedBox smoothness={2} bevelSegments={2} args={[0.22, 0.13, 0.32]} radius={0.06} position={[0, -0.26, 0.05]}>
                 <meshStandardMaterial color={BOOT} roughness={0.7} />
               </RoundedBox>
               <mesh position={[0, -0.32, 0.05]}>
@@ -353,20 +354,21 @@ export function Mechanic() {
         ))}
 
         <group ref={torso}>
+          <StaticMerge>
           {/* Round belly in overalls, white tee on top */}
-          <mesh position={[0, 0.17, 0]} scale={[1, 0.9, 0.85]} castShadow>
+          <mesh position={[0, 0.17, 0]} scale={[1, 0.9, 0.85]}>
             <sphereGeometry args={[0.36, 20, 16]} />
             <meshStandardMaterial color={DENIM} roughness={0.8} />
           </mesh>
-          <mesh position={[0, 0.42, 0]} scale={[1, 0.8, 0.85]} castShadow>
+          <mesh position={[0, 0.42, 0]} scale={[1, 0.8, 0.85]}>
             <sphereGeometry args={[0.32, 20, 16]} />
             <meshStandardMaterial color={SHIRT} roughness={0.9} />
           </mesh>
           {/* Bib, straps, screw buttons and the screwdriver in the pocket */}
-          <RoundedBox args={[0.34, 0.28, 0.08]} radius={0.04} position={[0, 0.36, 0.26]}>
+          <RoundedBox smoothness={2} bevelSegments={2} args={[0.34, 0.28, 0.08]} radius={0.04} position={[0, 0.36, 0.26]}>
             <meshStandardMaterial color={DENIM} roughness={0.8} />
           </RoundedBox>
-          <RoundedBox args={[0.16, 0.1, 0.03]} radius={0.015} position={[0.04, 0.32, 0.31]}>
+          <RoundedBox smoothness={2} bevelSegments={2} args={[0.16, 0.1, 0.03]} radius={0.015} position={[0.04, 0.32, 0.31]}>
             <meshStandardMaterial color={DENIM_LIGHT} roughness={0.8} />
           </RoundedBox>
           <mesh position={[0.08, 0.42, 0.3]} rotation-z={-0.15}>
@@ -386,9 +388,12 @@ export function Mechanic() {
             </group>
           ))}
 
+          </StaticMerge>
+
           {/* Head */}
           <group ref={head} position={[0, 0.9, 0.02]}>
-            <mesh castShadow scale={[1, 0.96, 0.94]}>
+            <StaticMerge>
+            <mesh scale={[1, 0.96, 0.94]}>
               <sphereGeometry args={[0.34, 24, 20]} />
               <meshStandardMaterial color={SKIN} roughness={0.75} />
             </mesh>
@@ -415,7 +420,7 @@ export function Mechanic() {
               </mesh>
             ))}
             {/* Eyes, brows, cheeks */}
-            <group ref={eyes}>
+            <group ref={eyes} userData={{ noMerge: true }}>
               {[-0.11, 0.11].map((x) => (
                 <group key={x} position={[x, 0.05, 0.28]}>
                   <mesh scale={[1, 1.15, 0.5]}>
@@ -465,7 +470,7 @@ export function Mechanic() {
                 <cylinderGeometry args={[0.2, 0.2, 0.035, 20, 1, false, -Math.PI / 2, Math.PI]} />
                 <meshStandardMaterial color={suit} roughness={0.6} />
               </mesh>
-              <RoundedBox args={[0.15, 0.085, 0.03]} radius={0.02} position={[0, 0.13, 0.29]} rotation-x={-0.45}>
+              <RoundedBox smoothness={2} bevelSegments={2} args={[0.15, 0.085, 0.03]} radius={0.02} position={[0, 0.13, 0.29]} rotation-x={-0.45}>
                 <meshStandardMaterial color="#6b3f22" />
               </RoundedBox>
               <mesh position={[0, 0.28, 0]}>
@@ -473,6 +478,7 @@ export function Mechanic() {
                 <meshStandardMaterial color={suit} />
               </mesh>
             </group>
+            </StaticMerge>
           </group>
 
           {/* Arms: short white sleeves, chubby hands; the right hand holds a screwdriver */}
