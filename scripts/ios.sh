@@ -20,6 +20,7 @@ if [ "$MODE" = dev ]; then
   echo "Live reload from $CAP_SERVER (keep 'npm run dev -- --host' running)"
 else
   npm run build
+  rm -rf dist/ota # the OTA zip is for the website, not for inside the app
 fi
 
 npx cap sync ios

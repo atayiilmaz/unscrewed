@@ -13,13 +13,18 @@
     "import:assets": "node scripts/import-assets.mjs",
     "ios": "scripts/ios.sh",
     "ios:dev": "scripts/ios.sh dev",
-    "ios:open": "npx cap open ios"
+    "ios:open": "npx cap open ios",
+    "android": "scripts/android.sh",
+    "android:dev": "scripts/android.sh dev",
+    "android:open": "npx cap open android"
   },
   "dependencies": {
+    "@capacitor/android": "^8.5.3",
     "@capacitor/core": "^8.5.3",
     "@capacitor/haptics": "^8.0.2",
     "@capacitor/ios": "^8.5.3",
     "@capacitor/status-bar": "^8.0.4",
+    "@capgo/capacitor-updater": "^8.53.0",
     "@react-three/drei": "^10.7.9",
     "@react-three/fiber": "^9.8.2",
     "react": "^19.2.8",
@@ -34,6 +39,7 @@
     "@types/react-dom": "^19.2.7",
     "@types/three": "^0.186.0",
     "@vitejs/plugin-react": "^6.1.1",
+    "fflate": "^0.8.3",
     "oxlint": "^1.81.0",
     "sharp": "^0.35.5",
     "tsx": "^4.23.15",

@@ -1,0 +1,6 @@
+{
+  "headers": [
+    { "source": "/ota/latest.json", "headers": [{ "key": "Cache-Control", "value": "no-store" }, { "key": "Access-Control-Allow-Origin", "value": "*" }] },
+    { "source": "/ota/(.*).zip", "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }, { "key": "Access-Control-Allow-Origin", "value": "*" }] }
+  ]
+}

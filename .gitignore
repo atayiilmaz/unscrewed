@@ -25,3 +25,7 @@ dist-ssr
 
 # iOS build output
 ios/App/build/
+
+# Android build output
+android/app/build/
+android/.gradle/

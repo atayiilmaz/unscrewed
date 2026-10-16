@@ -9,6 +9,10 @@ const config: CapacitorConfig = {
   webDir: 'dist',
   backgroundColor: '#18213d',
   ios: { contentInset: 'never', scrollEnabled: false },
+  plugins: {
+    // Updates are driven by src/services/ota.ts against our own Vercel deploy, not Capgo Cloud.
+    CapacitorUpdater: { autoUpdate: false, statsUrl: '', appReadyTimeout: 15000, autoDeletePrevious: true },
+  },
   ...(server ? { server: { url: server, cleartext: true } } : {}),
 }
 

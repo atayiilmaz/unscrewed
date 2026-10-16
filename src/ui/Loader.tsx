@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { homeReady } from '../home/HomeScene'
+import { markAppReady, updateIfAvailable } from '../services/ota'
 import type { Key } from '../i18n'
 import { useT } from '../useT'
 import { APP_VERSION } from './Settings'
@@ -36,6 +37,8 @@ export function Loader({ onDone }: { onDone: () => void }) {
   const [progress, setProgress] = useState(0.08)
   const [tip, setTip] = useState(() => Math.floor(Math.random() * TIPS.length))
   const [leaving, setLeaving] = useState(false)
+  /** Download progress of an over-the-air update, or null when none is running. */
+  const [update, setUpdate] = useState<number | null>(null)
 
   useEffect(() => {
     let alive = true
@@ -44,6 +47,11 @@ export function Loader({ onDone }: { onDone: () => void }) {
     let started = Infinity
     requestAnimationFrame(() => requestAnimationFrame(() => (started = performance.now())))
     void (async () => {
+      markAppReady()
+      // A newer build reloads the app into itself; otherwise this resolves and boot continues.
+      await updateIfAvailable((f) => alive && setUpdate(f))
+      if (!alive) return
+      setUpdate(null)
       const urls = await assetList()
       let done = 0
       const total = urls.length + 2
@@ -64,7 +72,7 @@ export function Loader({ onDone }: { onDone: () => void }) {
     }
   }, [onDone])
 
-  const pct = Math.round(progress * 100)
+  const pct = Math.round((update ?? progress) * 100)
   return (
     <div className={`loader ${leaving ? 'leaving' : ''}`}>
       <img className="loader-logo" src={`${BASE}brand/logo.webp`} alt={t('app.name')} />
@@ -78,7 +86,7 @@ export function Loader({ onDone }: { onDone: () => void }) {
         </div>
         <div className="loader-meta">
           <span>
-            {t('loading')} {pct}%
+            {update !== null ? t('updating') : t('loading')} {pct}%
           </span>
           <span>v{APP_VERSION}</span>
         </div>

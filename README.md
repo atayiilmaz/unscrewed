@@ -70,3 +70,21 @@ npm run ios:open   # projeyi Xcode'da aç
 ```
 
 Telefon kabloyla bağlı ya da aynı Wi-Fi'de, kilidi açık olmalı. Birden fazla cihaz varsa `IOS_DEVICE=<uuid>`.
+
+## Android'de test
+
+`android/` altında native Android projesi var (`io.peax.unscrewed`). Telefonda Geliştirici seçenekleri → USB hata ayıklama açık olmalı.
+
+```bash
+npm run android       # build → sync → APK → USB ile bağlı telefona yükle → aç
+npm run android:dev   # canlı yükleme (ayrı terminalde `npm run dev -- --host`)
+npm run android:open  # Android Studio'da aç
+```
+
+Telefon bağlı değilse APK yine üretilir: `android/app/build/outputs/apk/debug/app-debug.apk` (telefona gönderip kurulabilir).
+
+## Web kodu → iOS / Android
+
+Oyun tek bir web kodu. `npm run build` → `dist/`; `npx cap sync` bunu iki native projeye kopyalar.
+`ios/` ve `android/` klasörleri bir kez `npx cap add ios|android` ile oluşturuldu ve repoda tutulur;
+ikon, izin, yön gibi native ayarlar orada. Yeni Capacitor eklentisi kurunca `npx cap sync` yeterli.
