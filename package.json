@@ -10,9 +10,16 @@
     "preview": "vite preview",
     "test": "vitest run",
     "gen:levels": "tsx scripts/gen-levels.ts",
-    "import:assets": "node scripts/import-assets.mjs"
+    "import:assets": "node scripts/import-assets.mjs",
+    "ios": "scripts/ios.sh",
+    "ios:dev": "scripts/ios.sh dev",
+    "ios:open": "npx cap open ios"
   },
   "dependencies": {
+    "@capacitor/core": "^8.5.3",
+    "@capacitor/haptics": "^8.0.2",
+    "@capacitor/ios": "^8.5.3",
+    "@capacitor/status-bar": "^8.0.4",
     "@react-three/drei": "^10.7.9",
     "@react-three/fiber": "^9.8.2",
     "react": "^19.2.8",
@@ -21,6 +28,7 @@
     "zustand": "^5.0.15"
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.5.3",
     "@types/node": "^24.13.3",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.7",

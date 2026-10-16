@@ -57,3 +57,16 @@ npm run build
 Yeni nesne eklemek için `templates.ts`'e bir şablon ekleyip `npm run gen:levels` çalıştırmak yeterli.
 Seviyeler veri (JSON) olduğu için store sürümü beklemeden OTA ile gönderilebilir. Solver plakaların
 sallanmasını yok sayar; bütçe bu yüzden minimumun üstüne `slack` ekler.
+
+## iPhone'da test
+
+Capacitor ile `ios/` altında native bir iOS projesi var (bundle id `io.peax.unscrewed`, ekip `7K9DA5AX76`).
+
+```bash
+npm run ios        # build → sync → derle → telefona yükle → aç (internetsiz, mağaza sürümü gibi)
+npm run dev -- --host   # ayrı terminalde, sonra:
+npm run ios:dev    # telefon Mac'teki dev sunucusundan canlı yüklenir; kaydettikçe yenilenir
+npm run ios:open   # projeyi Xcode'da aç
+```
+
+Telefon kabloyla bağlı ya da aynı Wi-Fi'de, kilidi açık olmalı. Birden fazla cihaz varsa `IOS_DEVICE=<uuid>`.

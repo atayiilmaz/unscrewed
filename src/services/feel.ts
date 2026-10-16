@@ -1,4 +1,7 @@
 /** Synthesized sound + vibration so the prototype has feedback without audio assets. */
+import { Capacitor } from '@capacitor/core'
+import { Haptics, ImpactStyle, NotificationType } from '@capacitor/haptics'
+
 let ctx: AudioContext | null = null
 const options = { sfx: true, haptics: true }
 
@@ -36,8 +39,17 @@ function tone(freq: number, dur: number, type: OscillatorType, gain: number, del
   osc.stop(t + dur)
 }
 
+const native = Capacitor.isNativePlatform()
+
+/** Android/web vibrate by duration; iOS has no vibrate API, so map length to a haptic impact. */
 const vibrate = (ms: number | number[]) => {
   if (!options.haptics) return
+  if (native) {
+    const total = Array.isArray(ms) ? ms.reduce((a, b) => a + b, 0) : ms
+    if (Array.isArray(ms)) void Haptics.notification({ type: NotificationType.Error })
+    else void Haptics.impact({ style: total >= 25 ? ImpactStyle.Medium : ImpactStyle.Light })
+    return
+  }
   try {
     navigator.vibrate?.(ms)
   } catch {
