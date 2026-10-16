@@ -9,7 +9,11 @@ export JAVA_HOME="${JAVA_HOME_21:-/Applications/Android Studio.app/Contents/jbr/
 ADB="${ANDROID_HOME:-$HOME/Library/Android/sdk}/platform-tools/adb"
 APP_ID=io.peax.unscrewed
 
-if [ "${1:-bundle}" = dev ]; then
+if [ "${1:-bundle}" = live ]; then
+  # Thin shell around the deployed site: always shows the latest Vercel deploy, needs internet.
+  export CAP_SERVER="https://unscrewed-sandy.vercel.app"
+  echo "Loading the app from $CAP_SERVER"
+elif [ "${1:-bundle}" = dev ]; then
   IP="$(ipconfig getifaddr en0 || ipconfig getifaddr en1)"
   export CAP_SERVER="http://$IP:5199"
   echo "Live reload from $CAP_SERVER (keep 'npm run dev -- --host' running)"

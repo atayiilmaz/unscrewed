@@ -71,7 +71,10 @@ function SkillRow({ id, highlight }: { id: UpgradeId; highlight: boolean }) {
   const fresh = useGame((s) => s.celebrate?.what === id && s.celebrate.seq)
   const ref = useRef<HTMLDivElement>(null)
   useEffect(() => {
-    if (highlight) ref.current?.scrollIntoView({ block: 'center', behavior: 'smooth' })
+    // Scroll only the sheet: scrollIntoView would also shift the page (and the 3D view) on iOS.
+    const row = ref.current
+    const body = row?.closest('.sheet-body')
+    if (highlight && row && body) body.scrollTo({ top: row.offsetTop - body.clientHeight / 2 + row.clientHeight / 2, behavior: 'smooth' })
   }, [highlight])
   const u = UPGRADES[id]
   const lvl = profile.upgrades[id]

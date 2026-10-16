@@ -3,7 +3,6 @@ import { useEffect, useRef } from 'react'
 import { Vector3, type OrthographicCamera } from 'three'
 import { useGame } from '../game/store'
 import { Particles } from '../scene/Particles'
-import { SPOTS } from './layout'
 import { LabelProjector } from './labels'
 import { Mechanic } from './Mechanic'
 import { Room } from './Room'
@@ -12,6 +11,7 @@ import { World } from './World'
 /** Isometric view direction (from target to camera). */
 const VIEW = new Vector3(1, 1.05, 1).normalize()
 const PAN_LIMIT = 9
+const DRAG_THRESHOLD_PX = 10
 /** World units across the screen at zoom 1 (portrait phones). */
 const BASE_SPAN = 16
 
@@ -34,7 +34,9 @@ function CameraRig() {
   const { camera, gl, size } = useThree()
   const pointers = useRef(new Map<number, { x: number; y: number }>())
   const pinch = useRef(0)
-  const lastFocus = useRef(0)
+  /** A pan starts only after the finger travels this far, so taps never nudge the camera. */
+  const dragging = useRef(false)
+  const travel = useRef(0)
 
   useEffect(() => {
     const el = gl.domElement
@@ -45,6 +47,10 @@ function CameraRig() {
       return ps.length === 2 ? Math.hypot(ps[0].x - ps[1].x, ps[0].y - ps[1].y) : 0
     }
     const onDown = (e: PointerEvent) => {
+      if (pointers.current.size === 0) {
+        dragging.current = false
+        travel.current = 0
+      }
       pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY })
       pinch.current = down2()
     }
@@ -59,6 +65,11 @@ function CameraRig() {
         if (pinch.current > 0) cameraTarget.zoom = Math.min(1.9, Math.max(0.6, cameraTarget.zoom * (d / pinch.current)))
         pinch.current = d
         return
+      }
+      travel.current += Math.hypot(dx, dy)
+      if (!dragging.current) {
+        if (travel.current < DRAG_THRESHOLD_PX) return
+        dragging.current = true
       }
       const unit = BASE_SPAN / (Math.min(size.width, size.height * 0.62) * cameraTarget.zoom)
       cameraTarget.goalX = Math.max(-PAN_LIMIT, Math.min(PAN_LIMIT, cameraTarget.goalX - (right.x * dx + down.x * dy * 1.4) * unit))
@@ -86,14 +97,6 @@ function CameraRig() {
   }, [gl, size.width])
 
   useFrame((_, dt) => {
-    const focus = useGame.getState().focus
-    if (focus && focus.seq !== lastFocus.current) {
-      lastFocus.current = focus.seq
-      // Drift toward the tapped spot, but keep the room in frame.
-      const [sx, sz] = SPOTS[focus.spot].stand
-      cameraTarget.goalX = sx * 0.4 + 1.1
-      cameraTarget.goalZ = sz * 0.4 + 1.1
-    }
     const k = 1 - Math.exp(-dt * 6)
     cameraTarget.x += (cameraTarget.goalX - cameraTarget.x) * k
     cameraTarget.z += (cameraTarget.goalZ - cameraTarget.z) * k

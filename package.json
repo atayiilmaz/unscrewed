@@ -16,7 +16,9 @@
     "ios:open": "npx cap open ios",
     "android": "scripts/android.sh",
     "android:dev": "scripts/android.sh dev",
-    "android:open": "npx cap open android"
+    "android:open": "npx cap open android",
+    "ios:live": "scripts/ios.sh live",
+    "android:live": "scripts/android.sh live"
   },
   "dependencies": {
     "@capacitor/android": "^8.5.3",
