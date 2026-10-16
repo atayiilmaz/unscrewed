@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no" />
+    <meta name="theme-color" content="#18213d" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="description" content="Unscrewed! Screw puzzle: take toys apart screw by screw and grow your workshop." />
+    <title>Unscrewed!</title>
+    <link rel="icon" href="/favicon-64.png" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="preload" href="/brand/splash-bg.webp" as="image" />
+    <link rel="preload" href="/brand/logo.webp" as="image" />
+    <meta property="og:title" content="Unscrewed!" />
+    <meta property="og:image" content="/brand/splash-bg.webp" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    <div id="root">
+      <!-- Shown before any script runs; React swaps in the live loader with the same look. -->
+      <div style="position: fixed; inset: 0; background: #18213d url(/brand/splash-bg.webp) center bottom / cover no-repeat">
+        <img src="/brand/logo.webp" alt="Unscrewed!" style="position: absolute; left: 50%; top: 8vh; width: min(86vw, 460px); transform: translateX(-50%)" />
+        <div style="position: absolute; left: 50%; bottom: max(60px, env(safe-area-inset-bottom)); width: min(calc(100% - 44px), 420px); height: 18px; transform: translateX(-50%); border-radius: 99px; background: rgb(15 20 45 / 0.75)">
+          <div style="width: 8%; height: 12px; margin: 3px; border-radius: 99px; background: linear-gradient(90deg, #2fd3c4, #ffb02e)"></div>
+        </div>
+      </div>
+    </div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
